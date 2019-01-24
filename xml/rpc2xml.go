@@ -38,12 +38,15 @@ func rpcResponse2XML(rpc interface{}, writer io.Writer) error {
 func rpcParams2XML(rpc interface{}, writer io.Writer) error {
 	var err error
 	fmt.Fprintf(writer, "<params>")
+
 	for i := 0; i < reflect.ValueOf(rpc).Elem().NumField(); i++ {
 		fmt.Fprintf(writer, "<param>")
 		err = rpc2XML(reflect.ValueOf(rpc).Elem().Field(i).Interface(), writer)
 		fmt.Fprintf(writer, "</param>")
 	}
+
 	fmt.Fprintf(writer, "</params>")
+
 	return err
 }
 
