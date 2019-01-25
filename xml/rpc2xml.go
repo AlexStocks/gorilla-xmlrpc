@@ -59,14 +59,6 @@ func rpcParams2XML(rpc interface{}, writer io.Writer) error {
 }
 
 func rpc2XML(value interface{}, writer io.Writer) error {
-	// switch reflect.ValueOf(value).Kind() {
-	// case reflect.Ptr:
-	// 	if !reflect.ValueOf(value).IsNil() {
-	// 		fmt.Println("$$$$$$$$$$$$$$$$$")
-	// 		return rpc2XML(reflect.ValueOf(value).Elem().Interface(), writer)
-	// 	}
-	// }
-
 	fmt.Fprintf(writer, "<value>")
 	switch reflect.ValueOf(value).Kind() {
 	case reflect.Int:
