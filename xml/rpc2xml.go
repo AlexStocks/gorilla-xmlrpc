@@ -39,11 +39,19 @@ func rpcParams2XML(rpc interface{}, writer io.Writer) error {
 	var err error
 	fmt.Fprintf(writer, "<params>")
 
+	// switch reflect.ValueOf(rpc).Elem().Kind() {
+	// case reflect.Struct:
 	for i := 0; i < reflect.ValueOf(rpc).Elem().NumField(); i++ {
 		fmt.Fprintf(writer, "<param>")
 		err = rpc2XML(reflect.ValueOf(rpc).Elem().Field(i).Interface(), writer)
 		fmt.Fprintf(writer, "</param>")
 	}
+
+	// case reflect.Slice, reflect.Array:
+	// 	fmt.Fprintf(writer, "<param>")
+	// 	err = rpc2XML(rpc, writer)
+	// 	fmt.Fprintf(writer, "</param>")
+	// }
 
 	fmt.Fprintf(writer, "</params>")
 
@@ -51,6 +59,14 @@ func rpcParams2XML(rpc interface{}, writer io.Writer) error {
 }
 
 func rpc2XML(value interface{}, writer io.Writer) error {
+	// switch reflect.ValueOf(value).Kind() {
+	// case reflect.Ptr:
+	// 	if !reflect.ValueOf(value).IsNil() {
+	// 		fmt.Println("$$$$$$$$$$$$$$$$$")
+	// 		return rpc2XML(reflect.ValueOf(value).Elem().Interface(), writer)
+	// 	}
+	// }
+
 	fmt.Fprintf(writer, "<value>")
 	switch reflect.ValueOf(value).Kind() {
 	case reflect.Int:
@@ -101,7 +117,16 @@ func string2XML(value string, writer io.Writer) {
 	fmt.Fprintf(writer, "<string>%s</string>", value)
 }
 
+type XMLStruct interface {
+	MarshalXML() string
+}
+
 func struct2XML(value interface{}, writer io.Writer) {
+	if xs, ok := value.(XMLStruct); ok {
+		fmt.Fprintf(writer, xs.MarshalXML())
+		return
+	}
+
 	fmt.Fprintf(writer, "<struct>")
 	for i := 0; i < reflect.TypeOf(value).NumField(); i++ {
 		field := reflect.ValueOf(value).Field(i)
