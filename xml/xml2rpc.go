@@ -140,7 +140,8 @@ func value2Field(value value, field *reflect.Value) error {
 	case len(value.Struct) != 0:
 		if field.Kind() != reflect.Struct {
 			fault := FaultInvalidParams
-			fault.String += fmt.Sprintf("structure fields mismatch: %s != %s", field.Kind(), reflect.Struct.String())
+			fault.String += fmt.Sprintf("structure fields mismatch: %s != %s",
+				field.Kind(), reflect.Struct.String())
 			return fault
 		}
 		s := value.Struct
@@ -149,13 +150,16 @@ func value2Field(value value, field *reflect.Value) error {
 			// methods in lowercase, which cannot be used
 			field_name := uppercaseFirst(s[i].Name)
 			f := field.FieldByName(field_name)
+			fmt.Printf("set field %s\n", field_name)
 			err = value2Field(s[i].Value, &f)
+			if reflect.TypeOf(f.Interface()).Kind() == reflect.Slice {
+				fmt.Printf("set field %v\n", f.Interface().([]string))
+			}
 		}
 	case len(value.Array) != 0:
 		a := value.Array
 		f := *field
-		slice := reflect.MakeSlice(reflect.TypeOf(f.Interface()),
-			len(a), len(a))
+		slice := reflect.MakeSlice(reflect.TypeOf(f.Interface()), len(a), len(a))
 		for i := 0; i < len(a); i++ {
 			item := slice.Index(i)
 			err = value2Field(a[i], &item)
@@ -171,16 +175,74 @@ func value2Field(value value, field *reflect.Value) error {
 		}
 	}
 
+	assignFlag := false
 	if val != nil {
 		if reflect.TypeOf(val) != reflect.TypeOf(field.Interface()) {
-			fault := FaultInvalidParams
-			fault.String += fmt.Sprintf(": fields type mismatch: %s != %s",
-				reflect.TypeOf(val),
-				reflect.TypeOf(field.Interface()))
-			return fault
+			if field.Kind() == reflect.Slice {
+				if reflect.TypeOf(field.Interface()).Elem().Kind() == reflect.TypeOf(val).Kind() {
+					// fieldSlice := reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(val)), 1, 1)
+					fieldSlice := reflect.MakeSlice(reflect.TypeOf((*field).Interface()), 1, 1)
+					item := fieldSlice.Index(0)
+
+					// err = value2Field(value, &item)
+					switch item.Type().Kind() {
+					case reflect.Bool:
+						val = xml2Bool(value.Boolean)
+
+					case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int:
+						if value.Int4 != "" {
+							val, _ = strconv.Atoi(value.Int4)
+						} else {
+							val, _ = strconv.Atoi(value.Int)
+						}
+
+					case reflect.Float32, reflect.Float64:
+						val, _ = strconv.ParseFloat(value.Double, 64)
+
+					case reflect.String:
+						val = value.String
+
+					case reflect.Struct:
+						if field.Kind() != reflect.Struct {
+							fault := FaultInvalidParams
+							fault.String += fmt.Sprintf("structure fields mismatch: %s != %s",
+								field.Kind(), reflect.Struct.String())
+							return fault
+						}
+						s := value.Struct
+						for i := 0; i < len(s); i++ {
+							// Uppercase first letter for field name to deal with
+							// methods in lowercase, which cannot be used
+							field_name := uppercaseFirst(s[i].Name)
+							f := field.FieldByName(field_name)
+							fmt.Printf("set field %s\n", field_name)
+							err = value2Field(s[i].Value, &f)
+							if reflect.TypeOf(f.Interface()).Kind() == reflect.Slice {
+								fmt.Printf("set field %v\n", f.Interface().([]string))
+							}
+						}
+					default:
+						val = value.Raw
+					}
+					item.Set(reflect.ValueOf(val))
+					field.Set(fieldSlice)
+
+					assignFlag = true
+				}
+			}
+
+			if !assignFlag {
+				fault := FaultInvalidParams
+				fault.String += fmt.Sprintf(": fields type mismatch: value type %s != field type %s",
+					reflect.TypeOf(val),
+					reflect.TypeOf(field.Interface()))
+				return fault
+			}
 		}
 
-		field.Set(reflect.ValueOf(val))
+		if !assignFlag {
+			field.Set(reflect.ValueOf(val))
+		}
 	}
 
 	return err

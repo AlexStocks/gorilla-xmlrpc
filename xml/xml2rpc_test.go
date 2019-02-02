@@ -5,6 +5,7 @@
 package xml
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -263,8 +264,166 @@ Requiredattribute'user'notfound:
 	}
 }
 
-// func TestSupervisorMulticall(t *testing.T) {
-// 	// data := `<methodCall><methodName>system.multicall</methodName><params><param><value><array><data><value><struct><member><name>methodName</name><value><string>supervisor.getSupervisorVersion</string></value></member><member><name>params</name><value><array><data></data></array></value></member></struct></value><value><struct><member><name>methodName</name><value><string>supervisor.getAPIVersion</string></value></member><member><name>params</name><value><array><data></data></array></value></member></struct></value><value><struct><member><name>methodName</name><value><string>supervisor.getState</string></value></member><member><name>params</name><value><array><data></data></array></value></member></struct></value><value><struct><member><name>methodName</name><value><string>supervisor.getPID</string></value></member><member><name>params</name><value><array><data></data></array></value></member></struct></value></data></array></value></param></params></methodCall>`
-// }
+type ApiMethod struct {
+	MethodName string   `xml:"methodName" json:"methodName"`
+	Params     []string `xml:"params" json:"params"`
+}
 
-// `<methodResponse><params><param><value><array><data><value><string>3.1.4</string></value><value><string>3.0</string></value><value><struct><member><name>statename</name><value><string>RUNNING</string></value></member><member><name>statecode</name><value><int>1</int></value></member></struct></value><value><int>15146</int></value></data></array></value></param></params></methodResponse>`
+type MulticallArgs struct {
+	Methods []ApiMethod
+}
+
+func TestSupervisorMulticall(t *testing.T) {
+	xmlStr := `
+	<methodCall>
+	<methodName>system.multicall</methodName>
+	<params>
+			<param>
+					<value>
+							<array>
+									<data>
+											<value>
+													<struct>
+															<member>
+																	<name>methodName</name>
+																	<value>
+																			<string>supervisor.getState</string>
+																	</value>
+															</member>
+															<member>
+																	<name>params</name>
+																	<value>
+																			<array>
+																					<data></data>
+																			</array>
+																	</value>
+															</member>
+													</struct>
+											</value>
+											<value>
+													<struct>
+															<member>
+																	<name>methodName</name>
+																	<value>
+																			<string>supervisor.getProcessInfo</string>
+																	</value>
+															</member>
+															<member>
+																	<name>params</name>
+																	<value>
+																			<array>
+																					<data>
+																							<value>
+																									<string>signal</string>
+																							</value>
+																					</data>
+																			</array>
+																	</value>
+															</member>
+													</struct>
+											</value>
+									</data>
+							</array>
+					</value>
+			</param>
+	</params>
+</methodCall>
+`
+	args := &MulticallArgs{}
+	err := xml2RPC(xmlStr, args)
+	if err != nil {
+		t.Errorf("xml2RPC() = error:%s", err)
+	}
+
+	t.Logf("req args:%#v", args)
+}
+
+func TestSupervisorMulticallNilParams(t *testing.T) {
+	xmlStr := `
+<methodCall>
+    <methodName>system.multicall</methodName>
+    <params>
+        <param>
+            <value>
+                <array>
+                    <data>
+                        <value>
+                            <struct>
+                                <member>
+                                    <name>methodName</name>
+                                    <value>
+                                        <string>supervisor.getState</string>
+                                    </value>
+                                </member>
+                                <member>
+                                    <name>params</name>
+                                    <value>
+                                        <array>
+                                            <data></data>
+                                        </array>
+                                    </value>
+                                </member>
+                            </struct>
+                        </value>
+                    </data>
+                </array>
+            </value>
+        </param>
+    </params>
+</methodCall>
+	`
+	args := &MulticallArgs{}
+	err := xml2RPC(xmlStr, args)
+	if err != nil {
+		t.Errorf("xml2RPC() = error:%s", err)
+	}
+	if lg := len(args.Methods[0].Params); lg != 1 {
+		t.Errorf("params len %d != 1", lg)
+	}
+	fmt.Printf("params[0]:%s\n", args.Methods[0].Params[0])
+	if lg := len(args.Methods[0].Params[0]); lg != 0 {
+		t.Errorf("params[0] len %d != 1", lg)
+	}
+
+	// t.Logf("req args:%#v, req param len:%d, params len:%d", args, len(args.Methods), len(args.Methods[0].Params))
+}
+
+// `
+// <methodResponse>
+//     <params>
+//         <param>
+//             <value>
+//                 <array>
+//                     <data>
+//                         <value>
+//                             <string>3.1.4</string>
+//                         </value>
+//                         <value>
+//                             <string>3.0</string>
+//                         </value>
+//                         <value>
+//                             <struct>
+//                                 <member>
+//                                     <name>statename</name>
+//                                     <value>
+//                                         <string>RUNNING</string>
+//                                     </value>
+//                                 </member>
+//                                 <member>
+//                                     <name>statecode</name>
+//                                     <value>
+//                                         <int>1</int>
+//                                     </value>
+//                                 </member>
+//                             </struct>
+//                         </value>
+//                         <value>
+//                             <int>15146</int>
+//                         </value>
+//                     </data>
+//                 </array>
+//             </value>
+//         </param>
+//     </params>
+// </methodResponse>
+// `
