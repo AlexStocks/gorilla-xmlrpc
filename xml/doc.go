@@ -1,15 +1,15 @@
 /*
 XML-RPC implementation for the Gorilla/RPC toolkit.
 
-It's built on top of gorilla/rpc package in Go(Golang) language and implements XML-RPC, according to it's specification. Unlike net/rpc from Go strlib, gorilla/rpc allows usage of HTTP POST requests for RPC.
+It's built on top of AlexStocks/gorilla-rpc package in Go(Golang) language and implements XML-RPC, according to it's specification. Unlike net/rpc from Go strlib, AlexStocks/gorilla-rpc allows usage of HTTP POST requests for RPC.
 
 XML-RPC spec: http://xmlrpc.scripting.com/spec.html
 
 Installation
 
-Assuming you already imported gorilla/rpc, use the following command:
+Assuming you already imported AlexStocks/gorilla-rpc, use the following command:
 
-    go get github.com/divan/gorilla-xmlrpc/xml
+    go get github.com/AlexStocks/gorilla-xmlrpc/xml
 
 Implementation details
 

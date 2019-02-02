@@ -11,7 +11,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/gorilla/rpc"
+	"github.com/AlexStocks/gorilla-rpc"
 )
 
 // ----------------------------------------------------------------------------
