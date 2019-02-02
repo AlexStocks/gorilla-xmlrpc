@@ -384,8 +384,6 @@ func TestSupervisorMulticallNilParams(t *testing.T) {
 	if lg := len(args.Methods[0].Params[0]); lg != 0 {
 		t.Errorf("params[0] len %d != 1", lg)
 	}
-
-	// t.Logf("req args:%#v, req param len:%d, params len:%d", args, len(args.Methods), len(args.Methods[0].Params))
 }
 
 // `

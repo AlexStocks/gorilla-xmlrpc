@@ -150,11 +150,7 @@ func value2Field(value value, field *reflect.Value) error {
 			// methods in lowercase, which cannot be used
 			field_name := uppercaseFirst(s[i].Name)
 			f := field.FieldByName(field_name)
-			fmt.Printf("set field %s\n", field_name)
 			err = value2Field(s[i].Value, &f)
-			if reflect.TypeOf(f.Interface()).Kind() == reflect.Slice {
-				fmt.Printf("set field %v\n", f.Interface().([]string))
-			}
 		}
 	case len(value.Array) != 0:
 		a := value.Array
@@ -215,11 +211,7 @@ func value2Field(value value, field *reflect.Value) error {
 							// methods in lowercase, which cannot be used
 							field_name := uppercaseFirst(s[i].Name)
 							f := field.FieldByName(field_name)
-							fmt.Printf("set field %s\n", field_name)
 							err = value2Field(s[i].Value, &f)
-							if reflect.TypeOf(f.Interface()).Kind() == reflect.Slice {
-								fmt.Printf("set field %v\n", f.Interface().([]string))
-							}
 						}
 					default:
 						val = value.Raw
