@@ -116,7 +116,7 @@ func (c *CodecRequest) WriteResponse(w http.ResponseWriter, response interface{}
 			fault = FaultApplicationError
 			fault.String += fmt.Sprintf(": %v", c.err)
 		}
-		fault2XML(fault, buffer)
+		Fault2XML(fault, buffer)
 	} else {
 		rpcResponse2XML(response, buffer)
 	}

@@ -33,7 +33,7 @@ func (f Fault) Error() string {
 }
 
 // Fault2XML is a quick 'marshalling' replacemnt for the Fault case.
-func fault2XML(fault Fault, buffer io.Writer) {
+func Fault2XML(fault Fault, buffer io.Writer) {
 	fmt.Fprintf(buffer, "<methodResponse><fault>")
 	rpc2XML(fault, buffer)
 	fmt.Fprintf(buffer, "</fault></methodResponse>")
