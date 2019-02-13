@@ -13,6 +13,7 @@ import (
 // NOTE: XMLRPC spec doesn't specify any Fault codes.
 // These codes seems to be widely accepted, and taken from the http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php
 var (
+	FaultInvalidMethodName    = Fault{Code: -32601, String: "Requested Method Not Found"}
 	FaultInvalidParams        = Fault{Code: -32602, String: "Invalid Method Parameters"}
 	FaultWrongArgumentsNumber = Fault{Code: -32602, String: "Wrong Arguments Number"}
 	FaultInternalError        = Fault{Code: -32603, String: "Internal Server Error"}

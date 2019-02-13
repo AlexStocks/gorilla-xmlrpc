@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/AlexStocks/gorilla-rpc"
@@ -45,19 +44,20 @@ func (c *Codec) Methods() []string {
 }
 
 // NewRequest returns a CodecRequest.
-func (c *Codec) NewRequest(r *http.Request) rpc.CodecRequest {
-	rawxml, err := ioutil.ReadAll(r.Body)
+// func (c *Codec) NewRequest(r *http.Request) rpc.CodecRequest {
+func (c *Codec) NewRequest(rawxml []byte, err error) rpc.CodecRequest {
 	if err != nil {
 		return &CodecRequest{err: err}
 	}
-	defer r.Body.Close()
 
 	var request ServerRequest
 	if err := xml.Unmarshal(rawxml, &request); err != nil {
 		return &CodecRequest{err: err}
 	}
 	request.rawxml = string(rawxml)
-	if method, ok := c.aliases[request.Method]; ok {
+	method, ok := c.aliases[request.Method]
+	fmt.Printf("RRRR method:%s %s, ok:%v\n", request.Method, method, ok)
+	if ok {
 		request.Method = method
 	}
 	return &CodecRequest{request: &request}
@@ -68,8 +68,8 @@ func (c *Codec) NewRequest(r *http.Request) rpc.CodecRequest {
 // ----------------------------------------------------------------------------
 
 type ServerRequest struct {
-	Name   xml.Name `xml:"methodCall"`
-	Method string   `xml:"methodName"`
+	// Name   xml.Name `xml:"methodCall"`
+	Method string `xml:"methodName"`
 	rawxml string
 }
 
