@@ -56,7 +56,6 @@ func (c *Codec) NewRequest(rawxml []byte, err error) rpc.CodecRequest {
 	}
 	request.rawxml = string(rawxml)
 	method, ok := c.aliases[request.Method]
-	fmt.Printf("RRRR method:%s %s, ok:%v\n", request.Method, method, ok)
 	if ok {
 		request.Method = method
 	}

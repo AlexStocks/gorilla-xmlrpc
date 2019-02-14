@@ -29,9 +29,12 @@ func rpcResponse2XMLStr(rpc interface{}) (string, error) {
 }
 
 func rpcResponse2XML(rpc interface{}, writer io.Writer) error {
+	var err error
+
 	fmt.Fprintf(writer, "<methodResponse>")
-	err := rpcParams2XML(rpc, writer)
+	err = rpcParams2XML(rpc, writer)
 	fmt.Fprintf(writer, "</methodResponse>")
+
 	return err
 }
 
@@ -43,13 +46,13 @@ func rpcParams2XML(rpc interface{}, writer io.Writer) error {
 	// case reflect.Struct:
 	for i := 0; i < reflect.ValueOf(rpc).Elem().NumField(); i++ {
 		fmt.Fprintf(writer, "<param>")
-		err = rpc2XML(reflect.ValueOf(rpc).Elem().Field(i).Interface(), writer)
+		err = RPC2XML(reflect.ValueOf(rpc).Elem().Field(i).Interface(), writer)
 		fmt.Fprintf(writer, "</param>")
 	}
 
 	// case reflect.Slice, reflect.Array:
 	// 	fmt.Fprintf(writer, "<param>")
-	// 	err = rpc2XML(rpc, writer)
+	// 	err = RPC2XML(rpc, writer)
 	// 	fmt.Fprintf(writer, "</param>")
 	// }
 
@@ -58,7 +61,7 @@ func rpcParams2XML(rpc interface{}, writer io.Writer) error {
 	return err
 }
 
-func rpc2XML(value interface{}, writer io.Writer) error {
+func RPC2XML(value interface{}, writer io.Writer) error {
 	fmt.Fprintf(writer, "<value>")
 	switch reflect.ValueOf(value).Kind() {
 	case reflect.Int:
@@ -131,17 +134,18 @@ func struct2XML(value interface{}, writer io.Writer) {
 		}
 		fmt.Fprintf(writer, "<member>")
 		fmt.Fprintf(writer, "<name>%s</name>", name)
-		rpc2XML(field.Interface(), writer)
+		RPC2XML(field.Interface(), writer)
 		fmt.Fprintf(writer, "</member>")
 	}
 	fmt.Fprintf(writer, "</struct>")
+
 	return
 }
 
 func array2XML(value interface{}, writer io.Writer) {
 	fmt.Fprintf(writer, "<array><data>")
 	for i := 0; i < reflect.ValueOf(value).Len(); i++ {
-		rpc2XML(reflect.ValueOf(value).Index(i).Interface(), writer)
+		RPC2XML(reflect.ValueOf(value).Index(i).Interface(), writer)
 	}
 	fmt.Fprintf(writer, "</data></array>")
 }
