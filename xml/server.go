@@ -43,6 +43,23 @@ func (c *Codec) Methods() []string {
 	return methods
 }
 
+func (c *Codec) GetMethodName(method string) string {
+	method, ok := c.aliases[method]
+	if ok {
+		return method
+	}
+
+	var mth string
+	for _, m := range c.aliases {
+		if m == method {
+			mth = m
+			break
+		}
+	}
+
+	return mth
+}
+
 // NewRequest returns a CodecRequest.
 // func (c *Codec) NewRequest(r *http.Request) rpc.CodecRequest {
 func (c *Codec) NewRequest(rawxml []byte, err error) rpc.CodecRequest {
@@ -59,6 +76,7 @@ func (c *Codec) NewRequest(rawxml []byte, err error) rpc.CodecRequest {
 	if ok {
 		request.Method = method
 	}
+
 	return &CodecRequest{request: &request}
 }
 
@@ -94,6 +112,7 @@ func (c *CodecRequest) Method() (string, error) {
 // it gets populated from temporary XML structure
 func (c *CodecRequest) ReadRequest(args interface{}) error {
 	c.err = xml2RPC(c.request.rawxml, args)
+
 	return nil
 }
 
