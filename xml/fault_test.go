@@ -41,7 +41,6 @@ func (t *FaultTest) Multiply(r *http.Request, req *FaultTestRequest, res *FaultT
 	res.Result = req.A * req.B
 	return nil
 }
-
 func TestFaults(t *testing.T) {
 	s := rpc.NewServer()
 	s.RegisterCodec(NewCodec(), "text/xml")

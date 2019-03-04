@@ -61,6 +61,14 @@ func rpcParams2XML(rpc interface{}, writer io.Writer) error {
 	return err
 }
 
+func RPCParams2XMLForMulticall(rpc interface{}, writer io.Writer) error {
+	var err error
+	for i := 0; i < reflect.ValueOf(rpc).Elem().NumField(); i++ {
+		err = RPC2XML(reflect.ValueOf(rpc).Elem().Field(i).Interface(), writer)
+	}
+	return err
+}
+
 func RPC2XML(value interface{}, writer io.Writer) error {
 	fmt.Fprintf(writer, "<value>")
 	switch reflect.ValueOf(value).Kind() {
